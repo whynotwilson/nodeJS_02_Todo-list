@@ -1,3 +1,4 @@
+/*
 var express = require('express');
 var app = express();
 
@@ -8,7 +9,7 @@ app.get('/', function(req, res){   //第一個參數的/，因為這裡是根目
 
 app.listen(5000);
 console.log('Node Server is running on port 5000......');
-
+*/
 /*
     nodemon 不是內部或外部命令解決方法
     Windows下NodeJS安裝與npm環境變量配置
@@ -82,3 +83,83 @@ console.log('listening to port 3000');
 
 
 */
+
+var express = require('express');
+var bodyParser = require('body-parser');//解析 POST GET
+var fs = require('fs');
+var app = express();
+
+app.set('view engine', 'ejs' );//模板
+
+var multer = require('multer');//上傳檔案用
+
+var createFolder = function(folder){
+    try{
+        fs.accessSync(folder);//讀取目錄
+    }catch (e) {
+        fs.mkdirSync(folder)//建立目錄
+    }
+};
+
+var uploadFolder = './upload'; //設定客戶端上傳目錄
+
+createFolder(uploadFolder);
+
+var storage = multer.diskStorage({
+    //設定要上傳的目錄
+    destination: function(req, file, cb) {
+        cb(null, uploadFolder);
+    },
+    //上傳檔案的名字
+    filename: function(req, file, cb) {
+        cb(null, file.originalname);
+    }
+});
+
+var upload = multer({ storage: storage});
+
+//create application/json parser
+var jsonParser = bodyParser.json();
+
+//create application/x-www-form-urlencoded parser
+var urlencodedParser = bodyParser.urlencoded({extended: false});
+
+app.get('/', function(req, res){
+    console.dir(req.query);
+    res.send('home page: ');
+});
+
+app.get('/test/:name', function(req, res){
+    console.dir(req.query);
+    res.send(req.query.name);
+});
+
+app.get('/form/:name', function(req, res){
+    var data = {age: 29, job : 'preprogrammer', hobbie : ['eatting', 'sleeping', 'fighting'] };
+    res.render('form' , {data : data});
+});
+
+
+app.get('/about', function(req, res) {
+    res.render('about');
+});
+
+app.post('/', urlencodedParser, function(req, res){
+    console.dir(req.body);
+    res.send(req.body.name);
+});
+
+app.post('/upload', upload.single('logo'), function(req, res) {
+    console.dir(req.file);
+    res.send({'ret_code' : 0});
+});
+
+app.get('/profile/:id/user/:name', function(req,res){
+    console.dir(req.params);
+    console.dir(req.body);
+    console.dir(req.query);
+    res.send('You requested to see a profile with the name of ' + req.params.name);
+});
+
+app.listen(5000);
+console.log('Node.js server is running on port 5000......');
