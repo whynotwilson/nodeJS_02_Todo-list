@@ -83,7 +83,7 @@ console.log('listening to port 3000');
 
 
 */
-
+/* //8.使用模板引擎
 var express = require('express');
 var bodyParser = require('body-parser');//解析 POST GET
 var fs = require('fs');
@@ -163,3 +163,48 @@ app.get('/profile/:id/user/:name', function(req,res){
 
 app.listen(5000);
 console.log('Node.js server is running on port 5000......');
+*/
+
+/*//9.中間件
+
+
+var express = require('express');
+
+var app = express();
+
+app.use('/access', express.static('public'));//可使用靜態檔案，ex: png
+
+app.use(function(req, res, next) {
+    console.log('first middleware');
+    next();//遇到next 會先跳到下一個中間件，執行完再回來
+    console.log('first middleware after');
+});
+
+app.use('/home', function(req, res, next) {
+    console.log('second middleware');
+    res.send('ok');
+});
+
+app.listen(5000);
+console.log('listening to port 5000');
+
+*/
+
+/*  //10.路由中間件
+    //將各路由分開為不同的js文件，使用module.export 導出
+    //再從index.js 導入，
+    //好處：方便維護，閱讀方便
+*/
+
+var express = require('express');
+
+var app = express();
+
+var indexRouter = require('./routers/index');
+var usersRouter = require('./routers/users');
+
+app.use('/', indexRouter);
+app.use('/', usersRouter);
+
+app.listen(5000);
+console.log('listening to port 5000');
